@@ -1,2 +1,2 @@
-CoffeeMachine/obj/*
-CoffeeMachine/bin/*
+obj/**
+bin/**
