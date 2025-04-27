@@ -16,8 +16,8 @@ public class Coffee : ICoffee
     {
         Ingredients = new Dictionary<string, int>
         {
-            ["coffee"] = 1,
-            ["water"] = 16
+            {"coffee", 1},
+            {"water", 16}
         };
         Cost = 1.99d;
     }

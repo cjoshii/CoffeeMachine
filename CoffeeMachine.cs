@@ -89,25 +89,20 @@ public class CoffeeMachine : ICoffeeMachine, IDisposable
     {
         Console.WriteLine($"preparing order for {name}");
 
-        var water = coffee.Ingredients["water"];
-        var brew = coffee.Ingredients["coffee"];
-        var milk = 0;
-
-        if (coffee is Latte)
+        foreach (var ingredient in coffee.Ingredients)
         {
-            milk = coffee.Ingredients["milk"];
+            if (Ingredients[ingredient.Key] < ingredient.Value)
+            {
+                Console.WriteLine($"Refill {ingredient.GetType}");
+                State = MachineState.OutofOrder;
+                return;
+            }
         }
 
-        if (Ingredients["coffee"] < brew || Ingredients["water"] < water || Ingredients["milk"] < milk)
+        foreach (var ingredient in coffee.Ingredients)
         {
-            Console.WriteLine("Refill the ingredients");
-            State = MachineState.OutofOrder;
-            return;
+            Ingredients[ingredient.Key] -= ingredient.Value;
         }
-        Thread.Sleep(5000);//Time preparing coffee
-        Ingredients["coffee"] -= brew;
-        Ingredients["water"] -= water;
-        Ingredients["milk"] -= milk;
 
         Console.WriteLine($"Order is ready for {name}");
         State = MachineState.Idle;
