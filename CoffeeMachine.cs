@@ -4,7 +4,7 @@ public interface ICoffeeMachine
     MachineState State { get; }
     IDictionary<string, int> Ingredients { get; }
     event EventHandler<OrderEventArgs> OnOrder;
-    bool CreateOrder(string type, string name);
+    bool CreateOrder(ICoffee coffee, string name);
     void RefillIngridients();
 }
 
@@ -23,31 +23,31 @@ public class CoffeeMachine : ICoffeeMachine, IDisposable
     private CoffeeMachine()
     {
         State = MachineState.Idle;
+
         OrderQueue = new Queue<(ICoffee, string)>();
+
         Ingredients = new Dictionary<string, int>
         {
             ["water"] = 200,
             ["milk"] = 150,
             ["coffee"] = 30,
+            ["suger"] = 50,
+            ["carmel"] = 20,
+            ["honey"] = 20,
+            ["splenda"] = 50,
+            ["cream"] = 20,
+            ["soymilk"] = 10,
+            ["almondmilk"] = 10,
+            ["shot"] = 20
         };
+
         _cancellationTokenSource = new CancellationTokenSource();
         _queueProcessorTask = Task.Run(ProcessQueueAsync);
     }
 
-    public bool CreateOrder(string type, string name)
+    public bool CreateOrder(ICoffee coffee, string name)
     {
-        if (type != "coffee" && type != "latte")
-        {
-            Console.WriteLine("Invalid order");
-            return false;
-        }
-        ICoffee coffee;
-        if (type == "coffee")
-            coffee = new Coffee();
-        else
-            coffee = new Latte();
-
-        var args = new OrderEventArgs(coffee.Cost);
+        var args = new OrderEventArgs(coffee.GetCost());
         OnOrder?.Invoke(this, args);
 
         if (!args.Paid)
@@ -88,18 +88,19 @@ public class CoffeeMachine : ICoffeeMachine, IDisposable
     private void Brew(ICoffee coffee, string name)
     {
         Console.WriteLine($"preparing order for {name}");
+        var ingredients = coffee.GetIngredients();
 
-        foreach (var ingredient in coffee.Ingredients)
+        foreach (var ingredient in ingredients)
         {
             if (Ingredients[ingredient.Key] < ingredient.Value)
             {
-                Console.WriteLine($"Refill {ingredient.GetType}");
+                Console.WriteLine($"Refill {ingredient.Key}");
                 State = MachineState.OutofOrder;
                 return;
             }
         }
 
-        foreach (var ingredient in coffee.Ingredients)
+        foreach (var ingredient in ingredients)
         {
             Ingredients[ingredient.Key] -= ingredient.Value;
         }
@@ -120,6 +121,14 @@ public class CoffeeMachine : ICoffeeMachine, IDisposable
         Ingredients["water"] = 200;
         Ingredients["milk"] = 150;
         Ingredients["coffee"] = 30;
+        Ingredients["suger"] = 50;
+        Ingredients["carmel"] = 20;
+        Ingredients["honey"] = 20;
+        Ingredients["splenda"] = 50;
+        Ingredients["cream"] = 20;
+        Ingredients["soymilk"] = 10;
+        Ingredients["almondmilk"] = 10;
+        Ingredients["shot"] = 20;
         State = MachineState.Idle;
     }
 }
